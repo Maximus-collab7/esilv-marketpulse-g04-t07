@@ -25,7 +25,7 @@ Add a fourth row only if your team has four members.
 
 ## Market choice
 
-The common starter uses:
+The common starter u ses:
 
 - Instrument: AAPL - Apple Inc.
 - Benchmark: S&P 500
