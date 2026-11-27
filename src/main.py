@@ -120,23 +120,11 @@ def main():
     instrument_prices = fetch_remote_series(instrument["ticker"])
     benchmark_prices = fetch_remote_series(benchmark["ticker"])
 
-    print("=== MarketPulse ===")
-    print()
-    print(f"Period: {LOOKBACK_LABEL}")
-    print(f"Interval: {INTERVAL_LABEL}")
-    print()
-
-    print("Instrument")
-    display_market_summary(instrument, instrument_prices, show_currency=True)
-    print()
-
-    print("Benchmark")
-    display_market_summary(benchmark, benchmark_prices, show_currency=False)
-
     aligned_instrument, aligned_benchmark = align_series(
         instrument_prices,
         benchmark_prices,
     )
+
     validate_alignment(aligned_instrument, aligned_benchmark)
 
     instrument_return = calculate_period_return(aligned_instrument)
@@ -146,18 +134,55 @@ def main():
         instrument_return,
         benchmark_return,
     )
+
     instrument_base_100 = calculate_base_100(aligned_instrument)
     benchmark_base_100 = calculate_base_100(aligned_benchmark)
 
+    assert instrument_prices
+    assert benchmark_prices
+
+    assert all(row["ticker"] == "AAPL" for row in instrument_prices)
+    assert all(row["ticker"] == "SP500" for row in benchmark_prices)
+
+    assert instrument_base_100[0]["value"] == 100
+    assert benchmark_base_100[0]["value"] == 100
+
+    assert relative_performance == instrument_return - benchmark_return
+
+    assert YAHOO_PERIOD == "1mo"
+    assert YAHOO_INTERVAL == "1d"
+    print("=== MarketPulse ===")
     print()
+
+    print("Provider")
+    print("Yahoo Finance via yfinance")
+    print()
+
+    print("Market configuration")
+    print(f"Instrument : {instrument['ticker']} - {instrument['name']}")
+    print(f"Benchmark  : {benchmark['name']}")
+    print(f"Period     : {LOOKBACK_LABEL}")
+    print(f"Interval   : {INTERVAL_LABEL}")
+    print()
+
     print(f"Instrument return : {instrument_return:+.2f}%")
     print(f"Benchmark return  : {benchmark_return:+.2f}%")
-    print(f"Relative performance : {relative_performance:+.2f} percentage points")
-
     print()
+
+    print("Relative performance")
+    print(f"{instrument['ticker']} vs {benchmark['ticker']} : "
+          f"{relative_performance:+.2f} percentage points")
+    print()
+
     print("Base 100")
-    print(f"{instrument['ticker']:<5} : {instrument_base_100[0]['value']:.2f} -> {instrument_base_100[-1]['value']:.2f}")
-    print(f"{benchmark['ticker']:<5} : {benchmark_base_100[0]['value']:.2f} -> {benchmark_base_100[-1]['value']:.2f}")
+    print(f"{instrument['ticker']:<5} : "
+          f"{instrument_base_100[0]['value']:.2f} -> "
+          f"{instrument_base_100[-1]['value']:.2f}")
+
+    print(f"{benchmark['ticker']:<5} : "
+          f"{benchmark_base_100[0]['value']:.2f} -> "
+          f"{benchmark_base_100[-1]['value']:.2f}")
+
 
 
 if __name__ == "__main__":
